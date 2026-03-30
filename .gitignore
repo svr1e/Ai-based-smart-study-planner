@@ -1,0 +1,30 @@
+# Maven / Java
+backend/target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+node_modules/
+
+# Environment & Secrets — NEVER commit these
+.env
+.env.*
+backend/src/main/resources/application-local.properties
+
+# IDE
+.idea/
+.vscode/settings.json
+*.iml
+*.iws
+*.ipr
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

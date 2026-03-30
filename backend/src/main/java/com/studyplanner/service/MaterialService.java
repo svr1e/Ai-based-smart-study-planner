@@ -12,6 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
@@ -20,13 +22,21 @@ public class MaterialService {
     private final StudyMaterialRepository materialRepository;
     private final GeminiService geminiService;
 
+    static {
+        // Suppress noisy PDFBox font-scanning warnings from macOS system fonts (e.g. NotoSansKannada.ttc)
+        Logger.getLogger("org.apache.fontbox").setLevel(Level.OFF);
+        Logger.getLogger("org.apache.pdfbox").setLevel(Level.OFF);
+    }
+
     public StudyMaterial uploadAndExtract(MultipartFile file, String userId, String subject) throws IOException {
         String extractedText = extractText(file);
 
+        String filename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "Untitled";
+
         StudyMaterial material = new StudyMaterial();
         material.setUserId(userId);
-        material.setTitle(file.getOriginalFilename());
-        material.setFileName(file.getOriginalFilename());
+        material.setTitle(filename);
+        material.setFileName(filename);
         material.setSubject(subject);
         material.setExtractedText(extractedText);
         material.setFileSize(file.getSize());
@@ -35,7 +45,7 @@ public class MaterialService {
     }
 
     private String extractText(MultipartFile file) throws IOException {
-        String filename = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
+        String filename = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "unknown";
 
         if (filename.endsWith(".pdf")) {
             byte[] bytes = file.getBytes();

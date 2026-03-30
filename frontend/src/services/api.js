@@ -1,63 +1,75 @@
 import axios from 'axios'
 
+// In production (Netlify), use the Render backend URL via env var.
+// In dev, Vite's proxy handles /api → localhost:8080
+const BASE_URL = import.meta.env.VITE_API_URL || ''
+
+const api = axios.create({
+  baseURL: BASE_URL,
+})
+
+// Attach JWT token automatically to every request
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
 const BASE = '/api'
 
-const getHeaders = () => {
-  const token = localStorage.getItem('token')
-  return token ? { Authorization: `Bearer ${token}` } : {}
-}
-
 // Auth
-export const register = (data) => axios.post(`${BASE}/auth/register`, data)
-export const login = (data) => axios.post(`${BASE}/auth/login`, data)
+export const register = (data) => api.post(`${BASE}/auth/register`, data)
+export const login = (data) => api.post(`${BASE}/auth/login`, data)
 
 // Materials
 export const uploadMaterial = (formData) =>
-  axios.post(`${BASE}/materials/upload`, formData, { headers: getHeaders() })
+  api.post(`${BASE}/materials/upload`, formData)
 
 export const getMaterials = (userId) =>
-  axios.get(`${BASE}/materials/user/${userId}`, { headers: getHeaders() })
+  api.get(`${BASE}/materials/user/${userId}`)
 
 export const getMaterial = (id) =>
-  axios.get(`${BASE}/materials/${id}`, { headers: getHeaders() })
+  api.get(`${BASE}/materials/${id}`)
 
 export const askQuestion = (materialId, question) =>
-  axios.post(`${BASE}/materials/${materialId}/ask`, { question }, { headers: getHeaders() })
+  api.post(`${BASE}/materials/${materialId}/ask`, { question })
 
 export const summarizeMaterial = (materialId) =>
-  axios.post(`${BASE}/materials/${materialId}/summarize`, {}, { headers: getHeaders() })
+  api.post(`${BASE}/materials/${materialId}/summarize`, {})
 
 export const deleteMaterial = (id) =>
-  axios.delete(`${BASE}/materials/${id}`, { headers: getHeaders() })
+  api.delete(`${BASE}/materials/${id}`)
 
 // Study Plans
 export const generatePlan = (data) =>
-  axios.post(`${BASE}/plans/generate`, data, { headers: getHeaders() })
+  api.post(`${BASE}/plans/generate`, data)
 
 export const getUserPlans = (userId) =>
-  axios.get(`${BASE}/plans/user/${userId}`, { headers: getHeaders() })
+  api.get(`${BASE}/plans/user/${userId}`)
 
 export const getTodayPlans = (userId) =>
-  axios.get(`${BASE}/plans/user/${userId}/today`, { headers: getHeaders() })
+  api.get(`${BASE}/plans/user/${userId}/today`)
 
 export const getStats = (userId) =>
-  axios.get(`${BASE}/plans/user/${userId}/stats`, { headers: getHeaders() })
+  api.get(`${BASE}/plans/user/${userId}/stats`)
 
 export const markComplete = (planId) =>
-  axios.patch(`${BASE}/plans/${planId}/complete`, {}, { headers: getHeaders() })
+  api.patch(`${BASE}/plans/${planId}/complete`, {})
 
 export const markIncomplete = (planId) =>
-  axios.patch(`${BASE}/plans/${planId}/incomplete`, {}, { headers: getHeaders() })
+  api.patch(`${BASE}/plans/${planId}/incomplete`, {})
 
 export const deletePlan = (planId) =>
-  axios.delete(`${BASE}/plans/${planId}`, { headers: getHeaders() })
+  api.delete(`${BASE}/plans/${planId}`)
 
 // Quiz
 export const generateQuiz = (materialId, numQuestions = 5) =>
-  axios.get(`${BASE}/quiz/generate/${materialId}?numQuestions=${numQuestions}`, { headers: getHeaders() })
+  api.get(`${BASE}/quiz/generate/${materialId}?numQuestions=${numQuestions}`)
 
 export const submitQuiz = (data) =>
-  axios.post(`${BASE}/quiz/submit`, data, { headers: getHeaders() })
+  api.post(`${BASE}/quiz/submit`, data)
 
 export const getUserQuizzes = (userId) =>
-  axios.get(`${BASE}/quiz/user/${userId}`, { headers: getHeaders() })
+  api.get(`${BASE}/quiz/user/${userId}`)
