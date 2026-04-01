@@ -25,11 +25,16 @@ public class QuizService {
     public List<QnA> generateQuiz(String materialId, int numQuestions) {
         String json = materialService.generateQuiz(materialId, numQuestions);
         String cleanJson = json.replaceAll("```json", "").replaceAll("```", "").trim();
+        int startIndex = cleanJson.indexOf('[');
+        int endIndex = cleanJson.lastIndexOf(']');
+        if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
+            cleanJson = cleanJson.substring(startIndex, endIndex + 1);
+        }
 
         try {
             return objectMapper.readValue(cleanJson, new TypeReference<>() {});
         } catch (Exception e) {
-            log.error("Failed to parse quiz JSON: {}", json);
+            log.error("Failed to parse quiz JSON: {}\nCleaned JSON: {}", json, cleanJson);
             throw new RuntimeException("Failed to generate quiz. Please try again.");
         }
     }

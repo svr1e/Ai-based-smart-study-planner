@@ -36,14 +36,19 @@ public class StudyPlanService {
             req.getSubject(), req.getTopics(), req.getExamDate(), req.getDailyHours()
         );
 
-        // Clean JSON (remove markdown fences if present)
+        // Extract only the JSON array between [ and ]
         String cleanJson = json.replaceAll("```json", "").replaceAll("```", "").trim();
+        int startIndex = cleanJson.indexOf('[');
+        int endIndex = cleanJson.lastIndexOf(']');
+        if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
+            cleanJson = cleanJson.substring(startIndex, endIndex + 1);
+        }
 
         List<Map<String, Object>> sessions;
         try {
             sessions = objectMapper.readValue(cleanJson, new TypeReference<>() {});
         } catch (Exception e) {
-            log.error("Failed to parse Gemini response: {}", json);
+            log.error("Failed to parse Gemini response: {}\nCleaned JSON: {}", json, cleanJson);
             throw new RuntimeException("Failed to parse AI-generated schedule. Please try again.");
         }
 
