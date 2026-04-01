@@ -19,5 +19,9 @@ COPY --from=build /app/target/ai-study-planner-1.0.0.jar app.jar
 EXPOSE 8080
 
 ENTRYPOINT ["java", \
+  "-XX:+UseSerialGC", \
+  "-Xss512k", \
+  "-XX:MaxRAMPercentage=75.0", \
+  "-XX:TieredStopAtLevel=1", \
   "-Djava.security.egd=file:/dev/./urandom", \
   "-jar", "app.jar"]
